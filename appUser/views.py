@@ -14,29 +14,42 @@ def Browse(request):
     if request.method == "POST":
         button = request.POST.get("button")
         
-        name = request.POST.get("profile-name")
-        image = request.FILES.get("image")
-        password = request.POST.get("password")
-        active = request.POST.get("active")
-        
-        if name:
-            if active == None:
-                active = False
+        if button == "login-profil":
+            password = request.POST.get("profil-password")
+            profilid = request.POST.get("profilid")
+
+            profil = Profile.objects.get(id=profilid)
             
-            if button == "create":
-                if len(profils) < 4:
-                    profile = Profile(user=request.user ,name=name, image=image, password=password, password_active=active)
-                    profile.save()
-                    
-            if button == "update":
-                profilid = request.POST.get("profil-id")
-                profil = Profile.objects.get(id=profilid)
-                profil.name = name
-                if image != None:
-                    profil.image = image
-                profil.password = password
-                profil.password_active = active
-                profil.save()
+            if password == profil.password:
+                return redirect('/indexBrowse/{}/'.format(profil.slug))
+            else:
+                messages.warning(request,'Şifreniz Hatalı')
+            
+        else:
+            name = request.POST.get("profile-name")
+            image = request.FILES.get("image")
+            password = request.POST.get("password")
+            active = request.POST.get("active")
+            
+            if name:
+                if active == None:
+                    active = False
+                
+                if button == "create":
+                    if len(profils) < 4:
+                        profile = Profile(user=request.user ,name=name, image=image, password=password, password_active=active)
+                        profile.save()
+                        
+                if button == "update":
+                    profilid = request.POST.get("profil-id")
+                    profil = Profile.objects.get(id=profilid)
+                    profil.name = name
+                    if image != None:
+                        profil.image = image
+                    profil.password = password
+                    profil.password_active = active
+                    profil.save()
+        
                 
         return redirect("Browse")
     
@@ -118,3 +131,7 @@ def registerUser(request):
     
     context={}
     return render(request,'user/register.html', context)
+
+def logoutUser(request):
+    logout(request)
+    return redirect('index')
